@@ -10,9 +10,9 @@ namespace BookstoreApplication.Controllers
     {
         private readonly BookRepository _repository;
 
-        public BooksController(BookRepository repository)
+        public BooksController(BookRepository bookRepository)
         {
-            _repository = repository;
+            _repository = bookRepository;
         }
 
         // GET: api/books

@@ -10,18 +10,26 @@ namespace BookstoreApplication.Controllers
     [ApiController]
     public class AuthorsController : ControllerBase
     {
+        private readonly AuthorRepository _repository;
+
+        public AuthorsController(AuthorRepository authorRepository)
+        {
+            _repository = authorRepository;
+        }
+
         // GET: api/authors
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            return Ok(DataStore.Authors);
+            var authors = await _repository.GetAllAsync();
+            return Ok(authors);
         }
 
         // GET api/authors/5
         [HttpGet("{id}")]
-        public IActionResult GetOne(int id)
+        public async Task<IActionResult> GetOne(int id)
         {
-            var author = DataStore.Authors.FirstOrDefault(a => a.Id == id);
+            var author = await _repository.GetByIdAsync(id);
             if (author == null)
             {
                 return NotFound();
@@ -31,52 +39,39 @@ namespace BookstoreApplication.Controllers
 
         // POST api/authors
         [HttpPost]
-        public IActionResult Post(Author author)
+        public async Task<IActionResult> Post([FromBody] Author author)
         {
-            author.Id = DataStore.GetNewAuthorId();
-            DataStore.Authors.Add(author);
-            return Ok(author);
+            var createdAuthor = await _repository.CreateAsync(author);
+            return Ok(createdAuthor);
         }
 
         // PUT api/authors/5
         [HttpPut("{id}")]
-        public IActionResult Put(int id, Author author)
+        public async Task<IActionResult> Put(int id, [FromBody] Author author)
         {
             if (id != author.Id)
             {
                 return BadRequest();
             }
 
-            var existingAuthor = DataStore.Authors.FirstOrDefault(a => a.Id == id);
-            if (existingAuthor == null)
+            var updatedAuthor = await _repository.UpdateAsync(id, author);
+            if (updatedAuthor == null)
             {
                 return NotFound();
             }
 
-            int index = DataStore.Authors.IndexOf(existingAuthor);
-            if (index == -1)
-            {
-                return NotFound();
-                
-            }
-
-            DataStore.Authors[index] = author;
-            return Ok(author);
+            return Ok(updatedAuthor);
         }
 
         // DELETE api/authors/5
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var author = DataStore.Authors.FirstOrDefault(a => a.Id == id);
-            if (author == null)
+            var deleted = await _repository.DeleteAsync(id);
+            if (!deleted)
             {
                 return NotFound();
             }
-            DataStore.Authors.Remove(author);
-
-            // kaskadno brisanje svih knjiga obrisanog autora
-            DataStore.Books.RemoveAll(b => b.AuthorId == id);
 
             return NoContent();
         }
