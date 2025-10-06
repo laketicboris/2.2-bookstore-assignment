@@ -1,13 +1,12 @@
 ﻿using BookstoreApplication.Models;
-using BookstoreApplication.Repositories;
 
 namespace BookstoreApplication.Services
 {
-    public class PublisherService
+    public class PublisherService : IPublisherService
     {
-        private readonly PublisherRepository _repository;
+        private readonly IPublisherRepository _repository;
 
-        public PublisherService(PublisherRepository repository)
+        public PublisherService(IPublisherRepository repository)
         {
             _repository = repository;
         }

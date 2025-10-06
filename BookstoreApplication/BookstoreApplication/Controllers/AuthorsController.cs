@@ -8,9 +8,9 @@ namespace BookstoreApplication.Controllers
     [ApiController]
     public class AuthorsController : ControllerBase
     {
-        private readonly AuthorService _service;
+        private readonly IAuthorService _service;
 
-        public AuthorsController(AuthorService authorService)
+        public AuthorsController(IAuthorService authorService)
         {
             _service = authorService;
         }

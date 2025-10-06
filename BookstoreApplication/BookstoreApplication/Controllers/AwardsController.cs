@@ -6,57 +6,62 @@ namespace BookstoreApplication.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PublishersController : ControllerBase
+    public class AwardsController : ControllerBase
     {
-        private readonly IPublisherService _service;
+        private readonly IAwardService _service;
 
-        public PublishersController(IPublisherService publisherService)
+        public AwardsController(IAwardService awardService)
         {
-            _service = publisherService;
+            _service = awardService;
         }
 
+        // GET: api/awards
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            List<Publisher> publishers = await _service.GetAllAsync();
-            return Ok(publishers);
+            List<Award> awards = await _service.GetAllAsync();
+            return Ok(awards);
         }
 
+        // GET api/awards/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOne(int id)
         {
-            Publisher? publisher = await _service.GetByIdAsync(id);
-            if (publisher == null)
+            Award? award = await _service.GetByIdAsync(id);
+            if (award == null)
             {
                 return NotFound();
             }
-            return Ok(publisher);
+            return Ok(award);
         }
 
+        // POST api/awards
         [HttpPost]
-        public async Task<IActionResult> Post(Publisher publisher)
+        public async Task<IActionResult> Post([FromBody] Award award)
         {
-            Publisher createdPublisher = await _service.CreateAsync(publisher);
-            return Ok(createdPublisher);
+            Award createdAward = await _service.CreateAsync(award);
+            return Ok(createdAward);
         }
 
+        // PUT api/awards/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, Publisher publisher)
+        public async Task<IActionResult> Put(int id, [FromBody] Award award)
         {
-            if (id != publisher.Id)
+            if (id != award.Id)
             {
                 return BadRequest();
             }
 
-            Publisher? updatedPublisher = await _service.UpdateAsync(id, publisher);
-            if (updatedPublisher == null)
+            Award? updatedAward = await _service.UpdateAsync(id, award);
+            if (updatedAward == null)
             {
                 return NotFound();
             }
 
-            return Ok(updatedPublisher);
+            return Ok(updatedAward);
         }
 
+        // DELETE api/awards/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
