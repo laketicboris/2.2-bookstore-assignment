@@ -1,8 +1,6 @@
-﻿using BookstoreApplication.Data;
-using BookstoreApplication.Models;
+﻿using BookstoreApplication.Models;
+using BookstoreApplication.Services;
 using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace BookstoreApplication.Controllers
 {
@@ -10,26 +8,24 @@ namespace BookstoreApplication.Controllers
     [ApiController]
     public class AuthorsController : ControllerBase
     {
-        private readonly AuthorRepository _repository;
+        private readonly AuthorService _service;
 
-        public AuthorsController(AuthorRepository authorRepository)
+        public AuthorsController(AuthorService authorService)
         {
-            _repository = authorRepository;
+            _service = authorService;
         }
 
-        // GET: api/authors
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var authors = await _repository.GetAllAsync();
+            List<Author> authors = await _service.GetAllAsync();
             return Ok(authors);
         }
 
-        // GET api/authors/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOne(int id)
         {
-            var author = await _repository.GetByIdAsync(id);
+            Author? author = await _service.GetByIdAsync(id);
             if (author == null)
             {
                 return NotFound();
@@ -37,15 +33,13 @@ namespace BookstoreApplication.Controllers
             return Ok(author);
         }
 
-        // POST api/authors
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Author author)
         {
-            var createdAuthor = await _repository.CreateAsync(author);
+            Author createdAuthor = await _service.CreateAsync(author);
             return Ok(createdAuthor);
         }
 
-        // PUT api/authors/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] Author author)
         {
@@ -54,7 +48,7 @@ namespace BookstoreApplication.Controllers
                 return BadRequest();
             }
 
-            var updatedAuthor = await _repository.UpdateAsync(id, author);
+            Author? updatedAuthor = await _service.UpdateAsync(id, author);
             if (updatedAuthor == null)
             {
                 return NotFound();
@@ -63,11 +57,10 @@ namespace BookstoreApplication.Controllers
             return Ok(updatedAuthor);
         }
 
-        // DELETE api/authors/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _repository.DeleteAsync(id);
+            bool deleted = await _service.DeleteAsync(id);
             if (!deleted)
             {
                 return NotFound();

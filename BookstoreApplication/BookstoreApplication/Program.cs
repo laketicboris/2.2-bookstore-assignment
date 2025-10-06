@@ -1,5 +1,6 @@
 using BookstoreApplication.Models;
 using BookstoreApplication.Repositories;
+using BookstoreApplication.Services;  // DODAJ OVO
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,12 @@ builder.Services.AddScoped<AuthorRepository>();
 builder.Services.AddScoped<PublisherRepository>();
 builder.Services.AddScoped<BookRepository>();
 builder.Services.AddScoped<AwardRepository>();
+
+// DODAJ OVE 4 LINIJE:
+builder.Services.AddScoped<AuthorService>();
+builder.Services.AddScoped<PublisherService>();
+builder.Services.AddScoped<BookService>();
+builder.Services.AddScoped<AwardService>();
 
 // Add services to the container.
 builder.Services.AddControllers();
