@@ -1,6 +1,8 @@
+using AutoMapper;
 using BookstoreApplication.Models;
+using BookstoreApplication.Profiles;
 using BookstoreApplication.Repositories;
-using BookstoreApplication.Services;  // DODAJ OVO
+using BookstoreApplication.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 //Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<BookProfile>();
+});
 
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 builder.Services.AddScoped<IPublisherRepository, PublisherRepository>();

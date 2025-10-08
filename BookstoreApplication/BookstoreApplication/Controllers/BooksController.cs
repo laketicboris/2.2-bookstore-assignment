@@ -1,4 +1,5 @@
 ﻿using BookstoreApplication.Models;
+using BookstoreApplication.DTOs;
 using BookstoreApplication.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,14 +19,14 @@ namespace BookstoreApplication.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            List<Book> books = await _service.GetAllAsync();
+            List<BookDto> books = await _service.GetAllAsync();
             return Ok(books);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOne(int id)
         {
-            Book? book = await _service.GetByIdAsync(id);
+            BookDetailsDto? book = await _service.GetByIdAsync(id);
             if (book == null)
             {
                 return NotFound();
