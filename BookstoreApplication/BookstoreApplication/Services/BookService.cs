@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BookstoreApplication.DTOs;
 using BookstoreApplication.Models;
+using BookstoreApplication.Exceptions;
 
 namespace BookstoreApplication.Services
 {
@@ -26,7 +27,9 @@ namespace BookstoreApplication.Services
         {
             Book? book = await _repository.GetByIdAsync(id);
             if (book == null)
-                return null;
+            {
+                throw new NotFoundException(id);
+            }
 
             BookDetailsDto bookDetailsDto = _mapper.Map<BookDetailsDto>(book);
             return bookDetailsDto;
@@ -35,18 +38,35 @@ namespace BookstoreApplication.Services
         public async Task<Book?> CreateAsync(Book book)
         {
             Book? createdBook = await _repository.CreateAsync(book);
+            if (createdBook == null)
+            {
+                throw new BadRequestException("Author or Publisher not found");
+            }
             return createdBook;
         }
 
         public async Task<Book?> UpdateAsync(int id, Book book)
         {
+            if (id != book.Id)
+            {
+                throw new BadRequestException("ID in URL does not match ID in body");
+            }
+
             Book? updatedBook = await _repository.UpdateAsync(id, book);
+            if (updatedBook == null)
+            {
+                throw new NotFoundException(id);
+            }
             return updatedBook;
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
             bool deleted = await _repository.DeleteAsync(id);
+            if (!deleted)
+            {
+                throw new NotFoundException(id);
+            }
             return deleted;
         }
     }

@@ -27,10 +27,6 @@ namespace BookstoreApplication.Controllers
         public async Task<IActionResult> GetOne(int id)
         {
             BookDetailsDto? book = await _service.GetByIdAsync(id);
-            if (book == null)
-            {
-                return NotFound();
-            }
             return Ok(book);
         }
 
@@ -38,28 +34,13 @@ namespace BookstoreApplication.Controllers
         public async Task<IActionResult> Post(Book book)
         {
             Book? createdBook = await _service.CreateAsync(book);
-            if (createdBook == null)
-            {
-                return BadRequest("Author or Publisher not found");
-            }
-
             return Ok(createdBook);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, Book book)
         {
-            if (id != book.Id)
-            {
-                return BadRequest();
-            }
-
             Book? updatedBook = await _service.UpdateAsync(id, book);
-            if (updatedBook == null)
-            {
-                return NotFound();
-            }
-
             return Ok(updatedBook);
         }
 
@@ -67,11 +48,6 @@ namespace BookstoreApplication.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             bool deleted = await _service.DeleteAsync(id);
-            if (!deleted)
-            {
-                return NotFound();
-            }
-
             return NoContent();
         }
     }
