@@ -21,6 +21,8 @@ namespace BookstoreApplication.Profiles
                     opt => opt.MapFrom(src => src.Author != null ? src.Author.FullName : "Unknown"))
                 .ForMember(dest => dest.PublisherName,
                     opt => opt.MapFrom(src => src.Publisher != null ? src.Publisher.Name : "Unknown"));
+
+            CreateMap<Author, AuthorDto>();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using BookstoreApplication.Models;
+﻿using BookstoreApplication.DTOs;
+using BookstoreApplication.Models;
 using BookstoreApplication.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,9 +17,9 @@ namespace BookstoreApplication.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 5)
         {
-            List<Author> authors = await _service.GetAllAsync();
+            PaginatedList<AuthorDto> authors = await _service.GetAllAsync(pageNumber, pageSize);
             return Ok(authors);
         }
 
