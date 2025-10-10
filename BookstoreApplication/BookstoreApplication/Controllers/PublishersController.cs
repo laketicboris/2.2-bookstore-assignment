@@ -1,4 +1,5 @@
 ﻿using BookstoreApplication.Models;
+using BookstoreApplication.DTOs;
 using BookstoreApplication.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,20 +17,23 @@ namespace BookstoreApplication.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] PublisherSortType sortType = PublisherSortType.NameAscending)
         {
-            List<Publisher> publishers = await _service.GetAllAsync();
+            List<Publisher> publishers = await _service.GetAllSortedAsync(sortType);
             return Ok(publishers);
+        }
+
+        [HttpGet("sortTypes")]
+        public IActionResult GetSortTypes()
+        {
+            List<SortTypeOption> sortTypes = _service.GetSortTypes();
+            return Ok(sortTypes);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOne(int id)
         {
-            Publisher? publisher = await _service.GetByIdAsync(id);
-            if (publisher == null)
-            {
-                return NotFound();
-            }
+            Publisher publisher = await _service.GetByIdAsync(id);
             return Ok(publisher);
         }
 
@@ -43,29 +47,14 @@ namespace BookstoreApplication.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, Publisher publisher)
         {
-            if (id != publisher.Id)
-            {
-                return BadRequest();
-            }
-
-            Publisher? updatedPublisher = await _service.UpdateAsync(id, publisher);
-            if (updatedPublisher == null)
-            {
-                return NotFound();
-            }
-
+            Publisher updatedPublisher = await _service.UpdateAsync(id, publisher);
             return Ok(updatedPublisher);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            bool deleted = await _service.DeleteAsync(id);
-            if (!deleted)
-            {
-                return NotFound();
-            }
-
+            await _service.DeleteAsync(id);
             return NoContent();
         }
     }

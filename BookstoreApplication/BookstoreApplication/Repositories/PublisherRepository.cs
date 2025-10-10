@@ -1,4 +1,5 @@
 ﻿using BookstoreApplication.Models;
+using BookstoreApplication.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookstoreApplication.Repositories
@@ -15,6 +16,35 @@ namespace BookstoreApplication.Repositories
         public async Task<List<Publisher>> GetAllAsync()
         {
             return await _context.Publishers.ToListAsync();
+        }
+
+        public async Task<List<Publisher>> GetAllSortedAsync(PublisherSortType sortType)
+        {
+            IQueryable<Publisher> query = _context.Publishers;
+
+            query = sortType switch
+            {
+                PublisherSortType.NameAscending => query.OrderBy(p => p.Name),
+                PublisherSortType.NameDescending => query.OrderByDescending(p => p.Name),
+                PublisherSortType.AddressAscending => query.OrderBy(p => p.Address),
+                PublisherSortType.AddressDescending => query.OrderByDescending(p => p.Address),
+                _ => query.OrderBy(p => p.Name)
+            };
+
+            return await query.ToListAsync();
+        }
+
+        public List<SortTypeOption> GetSortTypes()
+        {
+            List<SortTypeOption> options = new List<SortTypeOption>();
+            var enumValues = Enum.GetValues(typeof(PublisherSortType));
+
+            foreach (PublisherSortType sortType in enumValues)
+            {
+                options.Add(new SortTypeOption(sortType));
+            }
+
+            return options;
         }
 
         public async Task<Publisher?> GetByIdAsync(int id)

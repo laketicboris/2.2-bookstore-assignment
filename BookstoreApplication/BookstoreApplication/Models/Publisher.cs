@@ -7,4 +7,11 @@
         public required string Address { get; set; }
         public required string Website { get; set; }
     }
+    public enum PublisherSortType
+    {
+        NameAscending,
+        NameDescending,
+        AddressAscending,
+        AddressDescending
+    }
 }
