@@ -23,6 +23,15 @@ namespace BookstoreApplication.Controllers
             return Ok(books);
         }
 
+        [HttpPost("filterAndSort")]
+        public async Task<IActionResult> GetFilteredAndSorted(
+            [FromBody] BookFilterDto filter,
+            [FromQuery] BookSortType sortType = BookSortType.TitleAscending)
+        {
+            List<BookDto> books = await _service.GetAllFilteredAndSortedAsync(filter, sortType);
+            return Ok(books);
+        }
+
         [HttpGet("sortTypes")]
         public IActionResult GetSortTypes()
         {

@@ -43,6 +43,18 @@ namespace BookstoreApplication.Services
             return bookDtos;
         }
 
+        public async Task<List<BookDto>> GetAllFilteredAndSortedAsync(BookFilterDto filter, BookSortType sortType)
+        {
+            _logger.LogInformation("BookService.GetAllFilteredAndSortedAsync called");
+
+            List<Book> books = await _repository.GetAllFilteredAndSortedAsync(filter, sortType);
+            List<BookDto> bookDtos = _mapper.Map<List<BookDto>>(books);
+
+            _logger.LogInformation("BookService.GetAllFilteredAndSortedAsync returned {Count} books", bookDtos.Count);
+
+            return bookDtos;
+        }
+
         public List<BookSortTypeOption> GetSortTypes()
         {
             return _repository.GetSortTypes();

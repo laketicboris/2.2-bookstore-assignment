@@ -41,6 +41,73 @@ namespace BookstoreApplication.Repositories
             return await query.ToListAsync();
         }
 
+        public async Task<List<Book>> GetAllFilteredAndSortedAsync(BookFilterDto filter, BookSortType sortType)
+        {
+            IQueryable<Book> query = _context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Publisher);
+
+            query = ApplyFilters(query, filter);
+
+            query = ApplySorting(query, sortType);
+
+            return await query.ToListAsync();
+        }
+
+        private static IQueryable<Book> ApplyFilters(IQueryable<Book> query, BookFilterDto filter)
+        {
+            if (!string.IsNullOrEmpty(filter.Title))
+            {
+                query = query.Where(b => b.Title.ToLower().Contains(filter.Title.ToLower()));
+            }
+
+            if (filter.PublishedDateFrom.HasValue)
+            {
+                query = query.Where(b => b.PublishedDate >= filter.PublishedDateFrom.Value);
+            }
+
+            if (filter.PublishedDateTo.HasValue)
+            {
+                query = query.Where(b => b.PublishedDate <= filter.PublishedDateTo.Value);
+            }
+
+            if (filter.AuthorId.HasValue)
+            {
+                query = query.Where(b => b.AuthorId == filter.AuthorId.Value);
+            }
+
+            if (!string.IsNullOrEmpty(filter.AuthorName))
+            {
+                query = query.Where(b => b.Author!.FullName.ToLower().Contains(filter.AuthorName.ToLower()));
+            }
+
+            if (filter.AuthorBirthDateFrom.HasValue)
+            {
+                query = query.Where(b => b.Author!.DateOfBirth >= filter.AuthorBirthDateFrom.Value);
+            }
+
+            if (filter.AuthorBirthDateTo.HasValue)
+            {
+                query = query.Where(b => b.Author!.DateOfBirth <= filter.AuthorBirthDateTo.Value);
+            }
+
+            return query;
+        }
+
+        private static IQueryable<Book> ApplySorting(IQueryable<Book> query, BookSortType sortType)
+        {
+            return sortType switch
+            {
+                BookSortType.TitleAscending => query.OrderBy(b => b.Title),
+                BookSortType.TitleDescending => query.OrderByDescending(b => b.Title),
+                BookSortType.PublishedDateAscending => query.OrderBy(b => b.PublishedDate),
+                BookSortType.PublishedDateDescending => query.OrderByDescending(b => b.PublishedDate),
+                BookSortType.AuthorNameAscending => query.OrderBy(b => b.Author!.FullName),
+                BookSortType.AuthorNameDescending => query.OrderByDescending(b => b.Author!.FullName),
+                _ => query.OrderBy(b => b.Title)
+            };
+        }
+
         public List<BookSortTypeOption> GetSortTypes()
         {
             List<BookSortTypeOption> options = new List<BookSortTypeOption>();

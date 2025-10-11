@@ -7,6 +7,7 @@ namespace BookstoreApplication.Services
     {
         Task<List<BookDto>> GetAllAsync();
         Task<List<BookDto>> GetAllSortedAsync(BookSortType sortType);
+        Task<List<BookDto>> GetAllFilteredAndSortedAsync(BookFilterDto filter, BookSortType sortType);
         Task<BookDetailsDto> GetByIdAsync(int id);
         Task<Book?> CreateAsync(Book book);
         Task<Book?> UpdateAsync(int id, Book book);
