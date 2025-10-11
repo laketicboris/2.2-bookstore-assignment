@@ -17,16 +17,23 @@ namespace BookstoreApplication.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] BookSortType sortType = BookSortType.TitleAscending)
         {
-            List<BookDto> books = await _service.GetAllAsync();
+            List<BookDto> books = await _service.GetAllSortedAsync(sortType);
             return Ok(books);
+        }
+
+        [HttpGet("sortTypes")]
+        public IActionResult GetSortTypes()
+        {
+            List<BookSortTypeOption> sortTypes = _service.GetSortTypes();
+            return Ok(sortTypes);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetOne(int id)
         {
-            BookDetailsDto? book = await _service.GetByIdAsync(id);
+            BookDetailsDto book = await _service.GetByIdAsync(id);
             return Ok(book);
         }
 

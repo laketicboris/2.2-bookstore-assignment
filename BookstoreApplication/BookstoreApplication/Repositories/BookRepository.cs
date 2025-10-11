@@ -1,4 +1,5 @@
 ﻿using BookstoreApplication.Models;
+using BookstoreApplication.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookstoreApplication.Repositories
@@ -18,6 +19,39 @@ namespace BookstoreApplication.Repositories
                 .Include(b => b.Author)
                 .Include(b => b.Publisher)
                 .ToListAsync();
+        }
+
+        public async Task<List<Book>> GetAllSortedAsync(BookSortType sortType)
+        {
+            IQueryable<Book> query = _context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Publisher);
+
+            query = sortType switch
+            {
+                BookSortType.TitleAscending => query.OrderBy(b => b.Title),
+                BookSortType.TitleDescending => query.OrderByDescending(b => b.Title),
+                BookSortType.PublishedDateAscending => query.OrderBy(b => b.PublishedDate),
+                BookSortType.PublishedDateDescending => query.OrderByDescending(b => b.PublishedDate),
+                BookSortType.AuthorNameAscending => query.OrderBy(b => b.Author!.FullName),
+                BookSortType.AuthorNameDescending => query.OrderByDescending(b => b.Author!.FullName),
+                _ => query.OrderBy(b => b.Title)
+            };
+
+            return await query.ToListAsync();
+        }
+
+        public List<BookSortTypeOption> GetSortTypes()
+        {
+            List<BookSortTypeOption> options = new List<BookSortTypeOption>();
+            var enumValues = Enum.GetValues(typeof(BookSortType));
+
+            foreach (BookSortType sortType in enumValues)
+            {
+                options.Add(new BookSortTypeOption(sortType));
+            }
+
+            return options;
         }
 
         public async Task<Book?> GetByIdAsync(int id)

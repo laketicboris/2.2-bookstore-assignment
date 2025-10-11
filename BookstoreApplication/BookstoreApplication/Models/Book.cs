@@ -14,4 +14,14 @@
         public int PublisherId { get; set; }
         public Publisher? Publisher { get; set; }
     }
+
+    public enum BookSortType
+    {
+        TitleAscending,
+        TitleDescending,
+        PublishedDateAscending,
+        PublishedDateDescending,
+        AuthorNameAscending,
+        AuthorNameDescending
+    }
 }

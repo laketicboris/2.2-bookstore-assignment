@@ -12,7 +12,6 @@ namespace BookstoreApplication.Services
         private readonly IMapper _mapper;
         private readonly ILogger<BookService> _logger;
 
-
         public BookService(IBookRepository repository, IMapper mapper, ILogger<BookService> logger)
         {
             _repository = repository;
@@ -30,6 +29,23 @@ namespace BookstoreApplication.Services
             _logger.LogInformation("BookService.GetAllAsync returned {Count} books", bookDtos.Count);
 
             return bookDtos;
+        }
+
+        public async Task<List<BookDto>> GetAllSortedAsync(BookSortType sortType)
+        {
+            _logger.LogInformation("BookService.GetAllSortedAsync called with sortType: {SortType}", sortType);
+
+            List<Book> books = await _repository.GetAllSortedAsync(sortType);
+            List<BookDto> bookDtos = _mapper.Map<List<BookDto>>(books);
+
+            _logger.LogInformation("BookService.GetAllSortedAsync returned {Count} books", bookDtos.Count);
+
+            return bookDtos;
+        }
+
+        public List<BookSortTypeOption> GetSortTypes()
+        {
+            return _repository.GetSortTypes();
         }
 
         public async Task<BookDetailsDto> GetByIdAsync(int id)
