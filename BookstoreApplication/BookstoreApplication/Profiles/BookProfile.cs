@@ -23,6 +23,10 @@ namespace BookstoreApplication.Profiles
                     opt => opt.MapFrom(src => src.Publisher != null ? src.Publisher.Name : "Unknown"));
 
             CreateMap<Author, AuthorDto>();
+
+            CreateMap<RegistrationDto, ApplicationUser>()
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Username))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email));
         }
     }
 }

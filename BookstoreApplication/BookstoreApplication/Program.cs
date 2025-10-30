@@ -1,9 +1,10 @@
 using AutoMapper;
+using BookstoreApplication.Middleware;
 using BookstoreApplication.Models;
 using BookstoreApplication.Profiles;
 using BookstoreApplication.Repositories;
 using BookstoreApplication.Services;
-using BookstoreApplication.Middleware;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -22,6 +23,21 @@ builder.Logging.AddSerilog(logger);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequireDigit = true;          // Ima bar jednu cifru
+    options.Password.RequireLowercase = true;      // Ima bar jedno malo slovo
+    options.Password.RequireUppercase = true;      // Ima bar jedno veliko slovo
+    options.Password.RequireNonAlphanumeric = true;// Ima bar jedan specijalan karakter (!, @, #...)
+    options.Password.RequiredLength = 8;           // Ima bar 8 karaktera
+});
+
+builder.Services.AddAuthentication();
+
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<BookProfile>();
@@ -37,6 +53,7 @@ builder.Services.AddScoped<IAuthorService, AuthorService>();
 builder.Services.AddScoped<IPublisherService, PublisherService>();
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IAwardService, AwardService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
@@ -69,6 +86,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors(); // DODAJTE OVU LINIJU
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
