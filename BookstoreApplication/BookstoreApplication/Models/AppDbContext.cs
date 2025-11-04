@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookstoreApplication.Models
@@ -15,6 +16,13 @@ namespace BookstoreApplication.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<IdentityRole>().HasData(
+                new IdentityRole { Name = "Librarian", NormalizedName = "LIBRARIAN" },
+                new IdentityRole { Name = "Editor", NormalizedName = "EDITOR" }
+            );
+
             modelBuilder.Entity<AuthorAward>()
                 .ToTable("AuthorAwardBridge");
 
@@ -50,8 +58,6 @@ namespace BookstoreApplication.Models
                 .OnDelete(DeleteBehavior.Cascade);
 
             SeedData(modelBuilder);
-
-            base.OnModelCreating(modelBuilder);
         }
 
         private void SeedData(ModelBuilder modelBuilder)

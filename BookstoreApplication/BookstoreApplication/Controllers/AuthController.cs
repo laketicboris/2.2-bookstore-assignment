@@ -19,6 +19,11 @@ namespace BookstoreApplication.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegistrationDto data)
         {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return BadRequest("Already logged in.");
+            }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -30,6 +35,11 @@ namespace BookstoreApplication.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto data)
         {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return BadRequest("Already logged in.");
+            }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -38,7 +48,7 @@ namespace BookstoreApplication.Controllers
             return Ok(new { token });
         }
 
-        [Authorize]
+        [Authorize(Roles = "Librarian,Editor")]
         [HttpGet("profile")]
         public async Task<IActionResult> Profile()
         {
