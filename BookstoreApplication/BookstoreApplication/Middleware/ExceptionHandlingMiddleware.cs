@@ -23,6 +23,28 @@ namespace BookstoreApplication.Middleware
 
         private async Task HandleExceptionAsync(HttpContext httpContext, Exception exception)
         {
+            switch (exception)
+            {
+                case GoogleAuthException:
+                case AuthenticationException:
+                case UserCreationException:
+                    await HandleGoogleAuthExceptionAsync(httpContext, exception);
+                    return;
+
+                default:
+                    await HandleRegularExceptionAsync(httpContext, exception);
+                    break;
+            }
+        }
+
+        private async Task HandleGoogleAuthExceptionAsync(HttpContext httpContext, Exception exception)
+        {
+            httpContext.Response.StatusCode = StatusCodes.Status302Found;
+            httpContext.Response.Headers.Location = "http://localhost:5173/auth/google-error";
+            await httpContext.Response.WriteAsync("");
+        }
+        private async Task HandleRegularExceptionAsync(HttpContext httpContext, Exception exception)
+        {
             httpContext.Response.ContentType = "application/json";
             httpContext.Response.StatusCode = exception switch
             {

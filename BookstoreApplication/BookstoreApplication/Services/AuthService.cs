@@ -16,12 +16,14 @@ namespace BookstoreApplication.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<AuthService> _logger;
 
-        public AuthService(UserManager<ApplicationUser> userManager, IMapper mapper, IConfiguration configuration)
+        public AuthService(UserManager<ApplicationUser> userManager, IMapper mapper, IConfiguration configuration, ILogger<AuthService> logger)
         {
             _userManager = userManager;
             _mapper = mapper;
             _configuration = configuration;
+            _logger = logger;
         }
 
         public async Task RegisterAsync(RegistrationDto data)
@@ -99,6 +101,66 @@ namespace BookstoreApplication.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+        public async Task<string> LoginWithGoogleAsync(ClaimsPrincipal googlePrincipal)
+        {
+            var email = googlePrincipal.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(email))
+                throw new GoogleAuthException("Email not provided by Google");
+
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                var name = googlePrincipal.FindFirstValue(ClaimTypes.Name);
+                user = await CreateGoogleUserAsync(email, name);
+                _logger.LogInformation("Created new Google user: {Email}", email);
+            }
+            else
+            {
+                _logger.LogInformation("Existing user logged in via Google: {Email}", email);
+            }
+
+            return await GenerateJwt(user);
+        }
+
+        public async Task<ApplicationUser> CreateGoogleUserAsync(string email, string? fullName)
+        {
+            var user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true,
+                Name = ExtractFirstName(fullName),
+                Surname = ExtractLastName(fullName),
+                DateOfBirth = DateTime.SpecifyKind(new DateTime(1990, 1, 1), DateTimeKind.Utc)
+            };
+
+            var result = await _userManager.CreateAsync(user);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new UserCreationException($"Failed to create Google user: {errors}");
+            }
+
+            await _userManager.AddToRoleAsync(user, "Librarian");
+            return user;
+        }
+
+        private static string ExtractFirstName(string? fullName)
+        {
+            if (string.IsNullOrWhiteSpace(fullName)) return "Google";
+
+            var parts = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return parts.Length > 0 ? parts[0] : "Google";
+        }
+
+        private static string ExtractLastName(string? fullName)
+        {
+            if (string.IsNullOrWhiteSpace(fullName)) return "User";
+
+            var parts = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return parts.Length > 1 ? string.Join(" ", parts.Skip(1)) : "User";
         }
     }
 }
