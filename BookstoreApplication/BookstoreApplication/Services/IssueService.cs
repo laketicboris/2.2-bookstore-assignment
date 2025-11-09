@@ -85,6 +85,15 @@ namespace BookstoreApplication.Services
             return createdIssue.Id;
         }
 
+        public async Task<IssueDto> GetIssueByIdAsync(int id)
+        {
+            var issue = await _issueRepository.GetByIdAsync(id);
+            if (issue == null)
+                throw new NotFoundException($"Issue with ID {id} not found");
+
+            return _mapper.Map<IssueDto>(issue);
+        }
+
         private async Task<IssueDto> GetIssueDetailsFromApi(int issueId)
         {
             var url = $"{_config["ComicVineBaseUrl"]}/issue/4000-{issueId}" +

@@ -6,5 +6,6 @@ namespace BookstoreApplication.Services
     {
         Task<List<IssueDto>> SearchIssuesByVolume(int volumeId);
         Task<int> CreateIssueAsync(SaveIssueDto saveIssueDto);
+        Task<IssueDto> GetIssueByIdAsync(int id);
     }
 }
