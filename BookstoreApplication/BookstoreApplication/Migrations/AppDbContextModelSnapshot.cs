@@ -482,6 +482,61 @@ namespace BookstoreApplication.Migrations
                         });
                 });
 
+            modelBuilder.Entity("BookstoreApplication.Models.Issue", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AvailableCopies")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<int>("ExternalApiId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("text");
+
+                    b.Property<int>("IssueNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("PageCount")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("ReleaseDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("VolumeApiDetailUrl")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("VolumeId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("VolumeName")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Issues");
+                });
+
             modelBuilder.Entity("BookstoreApplication.Models.Publisher", b =>
                 {
                     b.Property<int>("Id")
@@ -554,20 +609,6 @@ namespace BookstoreApplication.Migrations
                         .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "fc9b5e92-c928-4044-8ba0-4514ecbf5f7f",
-                            Name = "Librarian",
-                            NormalizedName = "LIBRARIAN"
-                        },
-                        new
-                        {
-                            Id = "84312117-0256-4143-802d-6a5aff56476a",
-                            Name = "Editor",
-                            NormalizedName = "EDITOR"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

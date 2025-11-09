@@ -13,15 +13,11 @@ namespace BookstoreApplication.Models
         public DbSet<Publisher> Publishers { get; set; }
         public DbSet<Award> Awards { get; set; }
         public DbSet<AuthorAward> AuthorAwards { get; set; }
+        public DbSet<Issue> Issues { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<IdentityRole>().HasData(
-                new IdentityRole { Name = "Librarian", NormalizedName = "LIBRARIAN" },
-                new IdentityRole { Name = "Editor", NormalizedName = "EDITOR" }
-            );
 
             modelBuilder.Entity<AuthorAward>()
                 .ToTable("AuthorAwardBridge");
@@ -56,6 +52,14 @@ namespace BookstoreApplication.Models
                 .WithMany()
                 .HasForeignKey(book => book.AuthorId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Issue>()
+                .Property(i => i.Price)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Issue>()
+                .Property(i => i.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             SeedData(modelBuilder);
         }

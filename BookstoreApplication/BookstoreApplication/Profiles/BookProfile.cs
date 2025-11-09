@@ -30,6 +30,31 @@ namespace BookstoreApplication.Profiles
 
             CreateMap<ApplicationUser, ProfileDto>()
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.UserName));
+
+            CreateMap<SaveIssueDto, Issue>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.Name, opt => opt.Ignore())
+                .ForMember(dest => dest.ReleaseDate, opt => opt.Ignore())
+                .ForMember(dest => dest.IssueNumber, opt => opt.Ignore())
+                .ForMember(dest => dest.ImagePath, opt => opt.Ignore())
+                .ForMember(dest => dest.Description, opt => opt.Ignore())
+                .ForMember(dest => dest.PageCount, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
+
+            CreateMap<Issue, IssueDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ExternalApiId))
+                .ForMember(dest => dest.CoverDate, opt => opt.MapFrom(src => src.ReleaseDate))
+                .ForMember(dest => dest.IssueNumberString, opt => opt.MapFrom(src => src.IssueNumber.ToString()))
+                .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.ImagePath != null ?
+                    new IssueImageDto { MediumUrl = src.ImagePath } : null))
+                .ForMember(dest => dest.Volume, opt => opt.MapFrom(src => src.VolumeName != null ?
+                    new IssueVolumeDto
+                    {
+                        Id = src.VolumeId,
+                        Name = src.VolumeName,
+                        ApiDetailUrl = src.VolumeApiDetailUrl
+                    } : null)
+                );
         }
     }
 }

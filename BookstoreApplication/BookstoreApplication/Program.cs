@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using BookstoreApplication.Middleware;
 using BookstoreApplication.Models;
 using BookstoreApplication.Profiles;
@@ -88,6 +88,12 @@ builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<BookProfile>();
 });
+
+builder.Services.AddScoped<IVolumeService, VolumeService>();
+builder.Services.AddScoped<IIssueService, IssueService>();
+builder.Services.AddScoped<IIssueRepository, IssueRepository>();
+builder.Services.AddScoped<IComicVineConnection, ComicVineConnection>();
+builder.Services.AddHttpClient<ComicVineConnection>();
 
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 builder.Services.AddScoped<IPublisherRepository, PublisherRepository>();

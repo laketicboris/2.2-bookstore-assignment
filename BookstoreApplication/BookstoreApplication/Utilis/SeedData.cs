@@ -10,14 +10,22 @@ namespace BookstoreApplication.Utils
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-            // Kreiranje prvog editora
+            string[] roles = { "Librarian", "Editor" };
+            foreach (var role in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(role));
+                }
+            }
+
             var editor1 = new ApplicationUser
             {
                 UserName = "john",
                 Email = "john.doe@example.com",
                 Name = "John",
                 Surname = "Doe",
-                DateOfBirth = DateTime.SpecifyKind(new DateTime(1985, 5, 15), DateTimeKind.Utc), // ✅ UTC
+                DateOfBirth = DateTime.SpecifyKind(new DateTime(1985, 5, 15), DateTimeKind.Utc),
                 EmailConfirmed = true
             };
 
@@ -27,14 +35,13 @@ namespace BookstoreApplication.Utils
                 await userManager.AddToRoleAsync(editor1, "Editor");
             }
 
-            // Kreiranje drugog editora
             var editor2 = new ApplicationUser
             {
                 UserName = "jane",
                 Email = "jane.doe@example.com",
                 Name = "Jane",
                 Surname = "Doe",
-                DateOfBirth = DateTime.SpecifyKind(new DateTime(1990, 8, 22), DateTimeKind.Utc), // ✅ UTC
+                DateOfBirth = DateTime.SpecifyKind(new DateTime(1990, 8, 22), DateTimeKind.Utc),
                 EmailConfirmed = true
             };
 
@@ -44,14 +51,13 @@ namespace BookstoreApplication.Utils
                 await userManager.AddToRoleAsync(editor2, "Editor");
             }
 
-            // Kreiranje treceg editora
             var editor3 = new ApplicationUser
             {
                 UserName = "nick",
                 Email = "nick.smith@example.com",
                 Name = "Nick",
                 Surname = "Smith",
-                DateOfBirth = DateTime.SpecifyKind(new DateTime(1987, 12, 3), DateTimeKind.Utc), // ✅ UTC
+                DateOfBirth = DateTime.SpecifyKind(new DateTime(1987, 12, 3), DateTimeKind.Utc),
                 EmailConfirmed = true
             };
 
