@@ -29,28 +29,41 @@ namespace BookstoreApplication.Services
             _logger = logger;
         }
 
-        public async Task<List<IssueDto>> SearchIssuesByVolume(int volumeId)
+        public async Task<PagedResult<IssueDto>> SearchIssuesByVolume(int volumeId, int page = 1, int pageSize = 10)
         {
-            _logger.LogInformation("Searching issues for volume ID: {VolumeId}", volumeId);
+            _logger.LogInformation("Searching issues for volume ID: {VolumeId}, page: {Page}, pageSize: {PageSize}", volumeId, page, pageSize);
+
+            int offset = (page - 1) * pageSize;
 
             var url = $"{_config["ComicVineBaseUrl"]}/issues" +
               $"?api_key={_config["ComicVineAPIKey"]}" +
               $"&format=json" +
+              $"&offset={offset}" +
+              $"&limit={pageSize}" +
               $"&filter=volume:{volumeId}" +
               $"&field_list=id,name,issue_number,cover_date,image,description,page_count,volume";
 
             var json = await _comicVineConnection.Get(url);
+
+            var fullResponse = JsonSerializer.Deserialize<JsonDocument>(json);
+            var resultsJson = fullResponse.RootElement.GetProperty("results").GetRawText();
+            var totalResults = fullResponse.RootElement.GetProperty("number_of_total_results").GetInt32();
 
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };
 
-            var issues = JsonSerializer.Deserialize<List<IssueDto>>(json, options) ?? new List<IssueDto>();
+            var issues = JsonSerializer.Deserialize<List<IssueDto>>(resultsJson, options) ?? new List<IssueDto>();
 
-            _logger.LogInformation("Found {Count} issues for volume ID: {VolumeId}", issues.Count, volumeId);
-
-            return issues;
+            return new PagedResult<IssueDto>
+            {
+                Data = issues,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalCount = totalResults,
+                TotalPages = (int)Math.Ceiling((double)totalResults / pageSize)
+            };
         }
 
         public async Task<int> CreateIssueAsync(SaveIssueDto saveIssueDto)
@@ -103,12 +116,15 @@ namespace BookstoreApplication.Services
 
             var json = await _comicVineConnection.Get(url);
 
+            var fullResponse = JsonSerializer.Deserialize<JsonDocument>(json);
+            var resultJson = fullResponse.RootElement.GetProperty("results").GetRawText();
+
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };
 
-            var issue = JsonSerializer.Deserialize<IssueDto>(json, options);
+            var issue = JsonSerializer.Deserialize<IssueDto>(resultJson, options);
 
             if (issue == null)
                 throw new NotFoundException($"Issue with ID {issueId} not found on Comic Vine API");

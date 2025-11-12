@@ -10,6 +10,7 @@
         public string AuthorFullName { get; set; }
         public string PublisherName { get; set; }
         public int YearsOld { get; set; }
+        public decimal AverageRating { get; set; }
 
     }
 }

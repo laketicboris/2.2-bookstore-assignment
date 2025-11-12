@@ -15,7 +15,6 @@ namespace BookstoreApplication.Repositories
         public async Task<Issue> CreateAsync(Issue issue)
         {
             _context.Issues.Add(issue);
-            await _context.SaveChangesAsync();
             return issue;
         }
 

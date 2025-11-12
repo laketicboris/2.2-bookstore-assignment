@@ -26,7 +26,6 @@ namespace BookstoreApplication.Repositories
         public async Task<Author> CreateAsync(Author author)
         {
             _context.Authors.Add(author);
-            await _context.SaveChangesAsync();
             return author;
         }
 
@@ -40,7 +39,6 @@ namespace BookstoreApplication.Repositories
             existingAuthor.Biography = author.Biography;
             existingAuthor.DateOfBirth = author.DateOfBirth;
 
-            await _context.SaveChangesAsync();
             return existingAuthor;
         }
 
@@ -51,7 +49,7 @@ namespace BookstoreApplication.Repositories
                 return false;
 
             _context.Authors.Remove(author);
-            await _context.SaveChangesAsync();
+
             return true;
         }
 

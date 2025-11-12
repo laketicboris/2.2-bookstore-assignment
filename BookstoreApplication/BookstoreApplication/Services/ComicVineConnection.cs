@@ -22,7 +22,6 @@ namespace BookstoreApplication.Services
 
             HttpResponseMessage response = await _client.SendAsync(request);
             var json = await response.Content.ReadAsStringAsync();
-
             JsonDocument jsonDocument = JsonDocument.Parse(json);
 
             if (!response.IsSuccessStatusCode)
@@ -32,7 +31,7 @@ namespace BookstoreApplication.Services
             if (statusCode != 1)
                 HandleUnsuccessfulRequest(response, jsonDocument);
 
-            return jsonDocument.RootElement.GetProperty("results").GetRawText();
+            return json;
         }
 
         private void HandleUnsuccessfulRequest(HttpResponseMessage response, JsonDocument jsonDocument)

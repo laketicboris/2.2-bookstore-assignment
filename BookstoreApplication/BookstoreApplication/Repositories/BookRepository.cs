@@ -1,6 +1,7 @@
 ﻿using BookstoreApplication.Models;
 using BookstoreApplication.DTOs;
 using Microsoft.EntityFrameworkCore;
+using BookstoreApplication.Utils;
 
 namespace BookstoreApplication.Repositories
 {
@@ -13,15 +14,16 @@ namespace BookstoreApplication.Repositories
             _context = context;
         }
 
-        public async Task<List<Book>> GetAllAsync()
+        public async Task<PagedResult<Book>> GetAllAsync(int page = 1, int pageSize = 10)
         {
-            return await _context.Books
+            IQueryable<Book> query = _context.Books
                 .Include(b => b.Author)
-                .Include(b => b.Publisher)
-                .ToListAsync();
+                .Include(b => b.Publisher);
+
+            return await query.ToPagedResultAsync(page, pageSize);
         }
 
-        public async Task<List<Book>> GetAllSortedAsync(BookSortType sortType)
+        public async Task<PagedResult<Book>> GetAllSortedAsync(BookSortType sortType, int page = 1, int pageSize = 10)
         {
             IQueryable<Book> query = _context.Books
                 .Include(b => b.Author)
@@ -38,20 +40,19 @@ namespace BookstoreApplication.Repositories
                 _ => query.OrderBy(b => b.Title)
             };
 
-            return await query.ToListAsync();
+            return await query.ToPagedResultAsync(page, pageSize);
         }
 
-        public async Task<List<Book>> GetAllFilteredAndSortedAsync(BookFilterDto filter, BookSortType sortType)
+        public async Task<PagedResult<Book>> GetAllFilteredAndSortedAsync(BookFilterDto filter, BookSortType sortType, int page = 1, int pageSize = 10)
         {
             IQueryable<Book> query = _context.Books
                 .Include(b => b.Author)
                 .Include(b => b.Publisher);
 
             query = ApplyFilters(query, filter);
-
             query = ApplySorting(query, sortType);
 
-            return await query.ToListAsync();
+            return await query.ToPagedResultAsync(page, pageSize);
         }
 
         private static IQueryable<Book> ApplyFilters(IQueryable<Book> query, BookFilterDto filter)
@@ -140,7 +141,6 @@ namespace BookstoreApplication.Repositories
                 return null;
 
             _context.Books.Add(book);
-            await _context.SaveChangesAsync();
 
             return await GetByIdAsync(book.Id);
         }
@@ -166,8 +166,6 @@ namespace BookstoreApplication.Repositories
             existingBook.AuthorId = book.AuthorId;
             existingBook.PublisherId = book.PublisherId;
 
-            await _context.SaveChangesAsync();
-
             return await GetByIdAsync(id);
         }
 
@@ -178,7 +176,6 @@ namespace BookstoreApplication.Repositories
                 return false;
 
             _context.Books.Remove(book);
-            await _context.SaveChangesAsync();
             return true;
         }
     }

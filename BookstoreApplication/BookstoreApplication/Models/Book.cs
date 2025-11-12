@@ -8,11 +8,15 @@
         public DateTime PublishedDate { get; set; }
         public required string ISBN { get; set; }
 
+        public decimal AverageRating { get; set; } = 0;
+
         public int AuthorId { get; set; }
         public Author? Author { get; set; }
 
         public int PublisherId { get; set; }
         public Publisher? Publisher { get; set; }
+
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 
     public enum BookSortType

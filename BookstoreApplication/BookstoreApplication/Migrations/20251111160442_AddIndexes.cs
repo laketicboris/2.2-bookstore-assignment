@@ -1,0 +1,36 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace BookstoreApplication.Migrations
+{
+    /// <inheritdoc />
+    public partial class AddIndexes : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateIndex(
+                name: "IX_Books_Title",
+                table: "Books",
+                column: "Title");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Authors_FullName",
+                table: "Authors",
+                column: "FullName");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_Books_Title",
+                table: "Books");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Authors_FullName",
+                table: "Authors");
+        }
+    }
+}

@@ -1,18 +1,20 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using System.Text;
+using System.Text.Json.Serialization;
+using AutoMapper;
+using BookstoreApplication.Infrastructure;
 using BookstoreApplication.Middleware;
 using BookstoreApplication.Models;
 using BookstoreApplication.Profiles;
 using BookstoreApplication.Repositories;
 using BookstoreApplication.Services;
 using BookstoreApplication.Utils;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Security.Claims;
-using System.Text;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -88,13 +90,18 @@ builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<BookProfile>();
 });
+// Unit of Work
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+
+builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IVolumeService, VolumeService>();
 builder.Services.AddScoped<IIssueService, IssueService>();
 builder.Services.AddScoped<IIssueRepository, IssueRepository>();
 builder.Services.AddScoped<IComicVineConnection, ComicVineConnection>();
 builder.Services.AddHttpClient<ComicVineConnection>();
 
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 builder.Services.AddScoped<IPublisherRepository, PublisherRepository>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
@@ -109,7 +116,12 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 

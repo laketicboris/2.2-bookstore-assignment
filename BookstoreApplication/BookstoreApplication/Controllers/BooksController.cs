@@ -17,20 +17,29 @@ namespace BookstoreApplication.Controllers
             _service = bookService;
         }
 
+        // GET /api/books?sortType=TitleAscending&page=1&pageSize=10
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] BookSortType sortType = BookSortType.TitleAscending)
+        public async Task<IActionResult> GetAll([FromQuery] BookSortType sortType = BookSortType.TitleAscending, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            List<BookDto> books = await _service.GetAllSortedAsync(sortType);
-            return Ok(books);
+            page = Math.Max(1, page);
+            pageSize = Math.Clamp(pageSize, 1, 100);
+
+            var paged = await _service.GetAllSortedAsync(sortType, page, pageSize);
+            return Ok(paged);
         }
 
         [HttpPost("filterAndSort")]
         public async Task<IActionResult> GetFilteredAndSorted(
             [FromBody] BookFilterDto filter,
-            [FromQuery] BookSortType sortType = BookSortType.TitleAscending)
+            [FromQuery] BookSortType sortType = BookSortType.TitleAscending,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
-            List<BookDto> books = await _service.GetAllFilteredAndSortedAsync(filter, sortType);
-            return Ok(books);
+            page = Math.Max(1, page);
+            pageSize = Math.Clamp(pageSize, 1, 100);
+
+            var paged = await _service.GetAllFilteredAndSortedAsync(filter, sortType, page, pageSize);
+            return Ok(paged);
         }
 
         [HttpGet("sortTypes")]

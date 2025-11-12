@@ -14,7 +14,9 @@ namespace BookstoreApplication.Profiles
                 .ForMember(dest => dest.PublisherName,
                     opt => opt.MapFrom(src => src.Publisher != null ? src.Publisher.Name : "Unknown"))
                 .ForMember(dest => dest.YearsOld,
-                    opt => opt.MapFrom(src => DateTime.Now.Year - src.PublishedDate.Year));
+                    opt => opt.MapFrom(src => DateTime.Now.Year - src.PublishedDate.Year))
+                .ForMember(dest => dest.AverageRating,
+                    opt => opt.MapFrom(src => src.AverageRating));
 
             CreateMap<Book, BookDetailsDto>()
                 .ForMember(dest => dest.AuthorFullName,
@@ -55,6 +57,13 @@ namespace BookstoreApplication.Profiles
                         ApiDetailUrl = src.VolumeApiDetailUrl
                     } : null)
                 );
+
+            CreateMap<NewReviewDto, Review>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.UserId, opt => opt.Ignore())
+                .ForMember(dest => dest.User, opt => opt.Ignore())
+                .ForMember(dest => dest.Book, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
         }
     }
 }

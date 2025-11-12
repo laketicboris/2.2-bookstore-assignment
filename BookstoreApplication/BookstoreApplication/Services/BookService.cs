@@ -3,6 +3,8 @@ using BookstoreApplication.DTOs;
 using BookstoreApplication.Models;
 using BookstoreApplication.Exceptions;
 using Microsoft.Extensions.Logging;
+using BookstoreApplication.Repositories;
+
 
 namespace BookstoreApplication.Services
 {
@@ -15,44 +17,65 @@ namespace BookstoreApplication.Services
         public BookService(IBookRepository repository, IMapper mapper, ILogger<BookService> logger)
         {
             _repository = repository;
-            _mapper = mapper;
-            _logger = logger;
+            _mapper = mapper;   
+            _logger = logger;   
         }
 
-        public async Task<List<BookDto>> GetAllAsync()
+        public async Task<PagedResult<BookDto>> GetAllAsync(int page = 1, int pageSize = 10)
         {
             _logger.LogInformation("BookService.GetAllAsync called");
 
-            List<Book> books = await _repository.GetAllAsync();
-            List<BookDto> bookDtos = _mapper.Map<List<BookDto>>(books);
+            var paged = await _repository.GetAllAsync(page, pageSize);
+            var dto = new PagedResult<BookDto>
+            {
+                Data = _mapper.Map<List<BookDto>>(paged.Data),
+                CurrentPage = paged.CurrentPage,
+                PageSize = paged.PageSize,
+                TotalCount = paged.TotalCount,
+                TotalPages = paged.TotalPages
+            };
 
-            _logger.LogInformation("BookService.GetAllAsync returned {Count} books", bookDtos.Count);
+            _logger.LogInformation("BookService.GetAllAsync returned {Count} books", dto.Data.Count);
 
-            return bookDtos;
+            return dto;
         }
 
-        public async Task<List<BookDto>> GetAllSortedAsync(BookSortType sortType)
+        public async Task<PagedResult<BookDto>> GetAllSortedAsync(BookSortType sortType, int page = 1, int pageSize = 10)
         {
             _logger.LogInformation("BookService.GetAllSortedAsync called with sortType: {SortType}", sortType);
 
-            List<Book> books = await _repository.GetAllSortedAsync(sortType);
-            List<BookDto> bookDtos = _mapper.Map<List<BookDto>>(books);
+            var paged = await _repository.GetAllSortedAsync(sortType, page, pageSize);
+            var dto = new PagedResult<BookDto>
+            {
+                Data = _mapper.Map<List<BookDto>>(paged.Data),
+                CurrentPage = paged.CurrentPage,
+                PageSize = paged.PageSize,
+                TotalCount = paged.TotalCount,
+                TotalPages = paged.TotalPages
+            };
 
-            _logger.LogInformation("BookService.GetAllSortedAsync returned {Count} books", bookDtos.Count);
+            _logger.LogInformation("BookService.GetAllSortedAsync returned {Count} books", dto.Data.Count);
 
-            return bookDtos;
+            return dto;
         }
 
-        public async Task<List<BookDto>> GetAllFilteredAndSortedAsync(BookFilterDto filter, BookSortType sortType)
+        public async Task<PagedResult<BookDto>> GetAllFilteredAndSortedAsync(BookFilterDto filter, BookSortType sortType, int page = 1, int pageSize = 10)
         {
             _logger.LogInformation("BookService.GetAllFilteredAndSortedAsync called");
 
-            List<Book> books = await _repository.GetAllFilteredAndSortedAsync(filter, sortType);
-            List<BookDto> bookDtos = _mapper.Map<List<BookDto>>(books);
+            var paged = await _repository.GetAllFilteredAndSortedAsync(filter, sortType, page, pageSize);
+            var dto = new PagedResult<BookDto>
+            {
+                Data = _mapper.Map<List<BookDto>>(paged.Data),
+                CurrentPage = paged.CurrentPage,
+                PageSize = paged.PageSize,
+                TotalCount = paged.TotalCount,
+                TotalPages = paged.TotalPages
+            };
 
-            _logger.LogInformation("BookService.GetAllFilteredAndSortedAsync returned {Count} books", bookDtos.Count);
+            _logger.LogInformation("BookService.GetAllFilteredAndSortedAsync returned {Count} books", dto.Data.Count);
 
-            return bookDtos;
+            return dto;
         }
 
         public List<BookSortTypeOption> GetSortTypes()

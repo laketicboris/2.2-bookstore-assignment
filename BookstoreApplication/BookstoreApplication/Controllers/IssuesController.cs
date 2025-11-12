@@ -16,18 +16,21 @@ namespace BookstoreApplication.Controllers
             _issueService = issueService;
         }
 
-        // GET /api/issues/search?volumeId=123
+        // GET /api/issues/search?volumeId=123&page=1&pageSize=10
         [HttpGet("search")]
         [Authorize(Roles = "Editor")]
-        public async Task<IActionResult> SearchIssuesByVolume([FromQuery] int volumeId)
+        public async Task<IActionResult> SearchIssuesByVolume([FromQuery] int volumeId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             if (volumeId <= 0)
             {
                 return BadRequest("Volume ID must be a positive number");
             }
 
-            var issues = await _issueService.SearchIssuesByVolume(volumeId);
-            return Ok(issues);
+            page = Math.Max(1, page);
+            pageSize = Math.Clamp(pageSize, 1, 100);
+
+            var pagedResult = await _issueService.SearchIssuesByVolume(volumeId, page, pageSize);
+            return Ok(pagedResult);
         }
 
         // POST /api/issues

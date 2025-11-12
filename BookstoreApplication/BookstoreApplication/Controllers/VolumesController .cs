@@ -19,15 +19,12 @@ namespace BookstoreApplication.Controllers
         // GET /api/volumes/search?query=Batman
         [HttpGet("search")]
         [Authorize(Roles = "Editor")]
-        public async Task<IActionResult> SearchVolumes([FromQuery] string query)
+        public async Task<IActionResult> SearchVolumes(
+        [FromQuery] string search = "",
+        [FromQuery] int page = 1)
         {
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                return BadRequest("Search query cannot be empty");
-            }
-
-            var volumes = await _volumeService.SearchVolumesByName(query);
-            return Ok(volumes);
+            var result = await _volumeService.SearchVolumesByName(search, page, 10);
+            return Ok(result);
         }
     }
 }

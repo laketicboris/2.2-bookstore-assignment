@@ -25,7 +25,6 @@ namespace BookstoreApplication.Repositories
         public async Task<Award> CreateAsync(Award award)
         {
             _context.Awards.Add(award);
-            await _context.SaveChangesAsync();
             return award;
         }
 
@@ -39,7 +38,6 @@ namespace BookstoreApplication.Repositories
             existingAward.Description = award.Description;
             existingAward.StartYear = award.StartYear;
 
-            await _context.SaveChangesAsync();
             return existingAward;
         }
 
@@ -50,7 +48,6 @@ namespace BookstoreApplication.Repositories
                 return false;
 
             _context.Awards.Remove(award);
-            await _context.SaveChangesAsync();
             return true;
         }
     }

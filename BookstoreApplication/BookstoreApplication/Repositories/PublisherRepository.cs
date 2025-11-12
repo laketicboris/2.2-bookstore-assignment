@@ -55,7 +55,6 @@ namespace BookstoreApplication.Repositories
         public async Task<Publisher> CreateAsync(Publisher publisher)
         {
             _context.Publishers.Add(publisher);
-            await _context.SaveChangesAsync();
             return publisher;
         }
 
@@ -69,7 +68,6 @@ namespace BookstoreApplication.Repositories
             existingPublisher.Address = publisher.Address;
             existingPublisher.Website = publisher.Website;
 
-            await _context.SaveChangesAsync();
             return existingPublisher;
         }
 
@@ -80,7 +78,6 @@ namespace BookstoreApplication.Repositories
                 return false;
 
             _context.Publishers.Remove(publisher);
-            await _context.SaveChangesAsync();
             return true;
         }
     }

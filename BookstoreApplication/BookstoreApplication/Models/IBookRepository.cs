@@ -1,12 +1,13 @@
 ﻿using BookstoreApplication.DTOs;
+using BookstoreApplication.Models;
 
-namespace BookstoreApplication.Models
+namespace BookstoreApplication.Repositories
 {
     public interface IBookRepository
     {
-        Task<List<Book>> GetAllAsync();
-        Task<List<Book>> GetAllSortedAsync(BookSortType sortType);
-        Task<List<Book>> GetAllFilteredAndSortedAsync(BookFilterDto filter, BookSortType sortType);
+        Task<PagedResult<Book>> GetAllAsync(int page = 1, int pageSize = 10);
+        Task<PagedResult<Book>> GetAllSortedAsync(BookSortType sortType, int page = 1, int pageSize = 10);
+        Task<PagedResult<Book>> GetAllFilteredAndSortedAsync(BookFilterDto filter, BookSortType sortType, int page = 1, int pageSize = 10);
         Task<Book?> GetByIdAsync(int id);
         Task<Book?> CreateAsync(Book book);
         Task<Book?> UpdateAsync(int id, Book book);

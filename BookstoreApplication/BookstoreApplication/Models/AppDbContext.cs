@@ -14,6 +14,8 @@ namespace BookstoreApplication.Models
         public DbSet<Award> Awards { get; set; }
         public DbSet<AuthorAward> AuthorAwards { get; set; }
         public DbSet<Issue> Issues { get; set; }
+        public DbSet<Review> Reviews { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -60,6 +62,41 @@ namespace BookstoreApplication.Models
             modelBuilder.Entity<Issue>()
                 .Property(i => i.CreatedAt)
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Book)
+                .WithMany(b => b.Reviews)
+                .HasForeignKey(r => r.BookId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Review>()
+                .Property(r => r.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            modelBuilder.Entity<Review>()
+                .Property(r => r.Rating)
+                .IsRequired();
+
+            modelBuilder.Entity<Book>()
+                .Property(b => b.AverageRating)
+                .HasColumnType("decimal(3,2)");
+
+            modelBuilder.Entity<Author>()
+                .HasIndex(a => a.FullName)
+                .HasDatabaseName("IX_Authors_FullName");
+
+            modelBuilder.Entity<Book>()
+                .HasIndex(b => b.AuthorId)
+                .HasDatabaseName("IX_Books_AuthorId");
+
+            modelBuilder.Entity<Book>()
+                .HasIndex(b => b.Title)
+                .HasDatabaseName("IX_Books_Title");
 
             SeedData(modelBuilder);
         }
