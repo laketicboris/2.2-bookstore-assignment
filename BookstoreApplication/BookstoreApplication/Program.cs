@@ -16,9 +16,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// SERILOG LOGGING KONFIGURACIJA
 var logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
@@ -27,7 +29,7 @@ var logger = new LoggerConfiguration()
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
 
-//Add services to the container.
+// POSTGRESQL + ENTITY FRAMEWORK KONFIGURACIJA
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -35,6 +37,22 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
 });
 
+// MONGODB KONFIGURACIJA 
+builder.Services.AddSingleton<IMongoClient>(serviceProvider =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("MongoDb");
+    return new MongoClient(connectionString);
+});
+
+builder.Services.AddScoped<IMongoDatabase>(serviceProvider =>
+{
+    var client = serviceProvider.GetService<IMongoClient>();
+    var databaseName = builder.Configuration.GetSection("MongoDatabase:DatabaseName").Value;
+    return client.GetDatabase(databaseName);
+});
+
+// IDENTITY KONFIGURACIJA
+// (ASP.NET Core Identity za autentifikaciju)
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
@@ -48,6 +66,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequiredLength = 8;
 });
 
+// AUTENTIFIKACIJA (JWT + GOOGLE OAUTH)
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -86,20 +105,33 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// AUTOMAPPER KONFIGURACIJA
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<BookProfile>();
 });
-// Unit of Work
+
+// UNIT OF WORK PATTERN
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-
+// SERVISI (Business Logic Layer)
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IVolumeService, VolumeService>();
 builder.Services.AddScoped<IIssueService, IssueService>();
-builder.Services.AddScoped<IIssueRepository, IssueRepository>();
+builder.Services.AddScoped<IAuthorService, AuthorService>();
+builder.Services.AddScoped<IPublisherService, PublisherService>();
+builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<IAwardService, AwardService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// COMIC VINE API CONNECTION
 builder.Services.AddScoped<IComicVineConnection, ComicVineConnection>();
 builder.Services.AddHttpClient<ComicVineConnection>();
+
+// REPOSITORIES
+
+// MONGODB REPOSITORIES (za stripove i main business logic)
+builder.Services.AddScoped<IIssueRepository, IssueMongoRepository>();
 
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
@@ -107,22 +139,18 @@ builder.Services.AddScoped<IPublisherRepository, PublisherRepository>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IAwardRepository, AwardRepository>();
 
-builder.Services.AddScoped<IAuthorService, AuthorService>();
-builder.Services.AddScoped<IPublisherService, PublisherService>();
-builder.Services.AddScoped<IBookService, BookService>();
-builder.Services.AddScoped<IAwardService, AwardService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-
+// MIDDLEWAR
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
-// Add services to the container.
+// CONTROLLERS + JSON KONFIGURACIJA
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.WriteIndented = true;
     });
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// SWAGGER DOKUMENTACIJA
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(c =>
@@ -155,7 +183,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// DODAJTE CORS KONFIGURACIJU
+// CORS KONFIGURACIJA
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(
@@ -170,21 +198,24 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// DATABASE SEEDING (za PostgreSQL Identity tabele)
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     await SeedData.InitializeAsync(services);
 }
 
+// MIDDLEWARE PIPELINE
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-// Configure the HTTP request pipeline.
+// Development environment konfiguracija
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// Request pipeline
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
